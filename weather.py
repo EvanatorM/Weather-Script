@@ -4,13 +4,10 @@ import datetime
 import calendar
 
 GOOGLE_MAPS_ENDPOINT = "https://maps.googleapis.com"
-GEOCODE_API_KEY = "ENTER_KEY_HERE"
+GEOCODE_API_KEY = "ENTER_API_KEY"
 
 TOMORROW_ENDPOINT = "https://api.tomorrow.io"
-TOMORROW_API_KEY = "ENTER_KEY_HERE"
-
-def celciusToFahrenheit(c):
-    return (c * (9/5)) + 32
+TOMORROW_API_KEY = "ENTER_API_KEY"
 
 def printDay(day):
     date_string = day["time"].split('T')[0].split('-')
@@ -21,8 +18,10 @@ def printDay(day):
     else:
         print(f"{calendar.day_name[date.weekday()]}, {calendar.month_name[date.month]} {date.day}:")
     
-    print(f"    Temperature: {round(celciusToFahrenheit(day["values"]["temperatureMin"]))}{chr(176)}F/{round(celciusToFahrenheit(day["values"]["temperatureMax"]))}{chr(176)}F (Avg {round(celciusToFahrenheit(day["values"]["temperatureAvg"]))}{chr(176)}F)")
+    print(f"    Temperature: Avg {round(day["values"]["temperatureAvg"])}{chr(176)}F ({round(day["values"]["temperatureMin"])}{chr(176)}F / {round(day["values"]["temperatureMax"])}{chr(176)}F)")
     print(f"    Chance of Precipitation: {day["values"]["precipitationProbabilityMax"]}%")
+    print(f"    Wind Speed: Avg {day["values"]["windSpeedAvg"]} MPH ({day["values"]["windSpeedMin"]} MPH / {day["values"]["windSpeedMax"]} MPH)")
+    print("")
 
 def main():
     # Get zip from user
@@ -46,7 +45,7 @@ def main():
     location = f"{lat},{long}"
 
     # Get weather info
-    res = requests.get(f"{TOMORROW_ENDPOINT}/v4/weather/forecast?location={location}&apikey={TOMORROW_API_KEY}")
+    res = requests.get(f"{TOMORROW_ENDPOINT}/v4/weather/forecast?location={location}&apikey={TOMORROW_API_KEY}&units=imperial")
 
     if (res.status_code != 200):
         print("Failed to get location from zipcode")
@@ -54,7 +53,7 @@ def main():
 
     data = json.loads(res.content)
     daily = data["timelines"]["daily"]
-    print(f"Forecast for {city}:")
+    print(f"---------- Forecast for {city}: ----------")
     printDay(daily[0])
     printDay(daily[1])
     printDay(daily[2])
