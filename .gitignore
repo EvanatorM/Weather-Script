@@ -1,2 +1,3 @@
 .venv/
-apikeys
+__pycache__/
+config.py
