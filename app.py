@@ -2,8 +2,8 @@ import requests
 import json
 import datetime
 import calendar
-import config
-import validate
+import src.config as config
+import src.validate as validate
 
 GOOGLE_MAPS_ENDPOINT = "https://maps.googleapis.com"
 TOMORROW_ENDPOINT = "https://api.tomorrow.io"
