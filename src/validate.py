@@ -11,7 +11,7 @@ def validateZip(zip):
 def validateAddress(data):
     # Check if address exists
     if (len(data["results"]) == 0):
-        print("Zip does not exist")
+        print("Cannot find zip code")
         return False
 
     return True
