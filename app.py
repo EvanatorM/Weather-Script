@@ -24,20 +24,25 @@ def getLocation(zip):
         return None, None
 
     # Validate address
-    data = json.loads(res.content)
-    if (not validate.validateAddress(data)):
-        return None, None
-    
     try:
+        data = json.loads(res.content)
+        if (not validate.validateAddress(data)):
+            print("Failed to get location from zipcode")
+            return None, None
+        
         # Check if components are there
         city = data["results"][0]["address_components"][1]["long_name"]
         lat = data["results"][0]["geometry"]["location"]["lat"]
         long = data["results"][0]["geometry"]["location"]["lng"]
 
-        # Check if lat and long are valid floats
-        float(lat)
-        float(long)
+        # Validate lat and long
+        if (not validate.validateLatLong(lat, long)):
+            print("Failed to get location from zipcode")
+            return None, None
     except:
+        # If this errors out, it means the response is invalid
+        # I didn't put this in validate.py since it does both validation and getting
+        # the variables at the same time.
         print("Failed to get location from zipcode")
         return None, None
 
@@ -52,29 +57,39 @@ def getWeather(location):
         print("Failed to get weather from zipcode")
         return None
     
+    if (not validate.validateWeather(res.content)):
+        print("Failed to get weather from zipcode")
+        return None
+    
     return res.content
 
 def printDay(day):
-    date_string = day["time"].split('T')[0].split('-')
-    date = datetime.datetime(int(date_string[0]), int(date_string[1]), int(date_string[2]))
+    try:
+        date_string = day["time"].split('T')[0].split('-')
+        date = datetime.datetime(int(date_string[0]), int(date_string[1]), int(date_string[2]))
 
-    if (date.date() == datetime.date.today()):
-        print(f"Today ({calendar.day_name[date.weekday()]}, {calendar.month_name[date.month]} {date.day}):")
-    else:
-        print(f"{calendar.day_name[date.weekday()]}, {calendar.month_name[date.month]} {date.day}:")
-    
-    print(f"    Temperature: Avg {round(day["values"]["temperatureAvg"])}{chr(176)}F ({round(day["values"]["temperatureMin"])}{chr(176)}F / {round(day["values"]["temperatureMax"])}{chr(176)}F)")
-    print(f"    Chance of Precipitation: {day["values"]["precipitationProbabilityMax"]}%")
-    print(f"    Wind Speed: Avg {day["values"]["windSpeedAvg"]} MPH ({day["values"]["windSpeedMin"]} MPH / {day["values"]["windSpeedMax"]} MPH)")
-    print("")
+        if (date.date() == datetime.date.today()):
+            print(f"Today ({calendar.day_name[date.weekday()]}, {calendar.month_name[date.month]} {date.day}):")
+        else:
+            print(f"{calendar.day_name[date.weekday()]}, {calendar.month_name[date.month]} {date.day}:")
+        
+        print(f"    Temperature: Avg {round(day["values"]["temperatureAvg"])}{chr(176)}F ({round(day["values"]["temperatureMin"])}{chr(176)}F / {round(day["values"]["temperatureMax"])}{chr(176)}F)")
+        print(f"    Chance of Precipitation: {day["values"]["precipitationProbabilityMax"]}%")
+        print(f"    Wind Speed: Avg {day["values"]["windSpeedAvg"]} MPH ({day["values"]["windSpeedMin"]} MPH / {day["values"]["windSpeedMax"]} MPH)")
+        print("")
+    except:
+        print("Failed to print weather")
 
 def printWeather(data, city):
-    data = json.loads(data)
-    daily = data["timelines"]["daily"]
-    print(f"---------- Forecast for {city}: ----------")
-    printDay(daily[0])
-    printDay(daily[1])
-    printDay(daily[2])
+    try:
+        data = json.loads(data)
+        daily = data["timelines"]["daily"]
+        print(f"---------- Forecast for {city}: ----------")
+        printDay(daily[0])
+        printDay(daily[1])
+        printDay(daily[2])
+    except:
+        print("Invalid weather response")
 
 def main():
     # Get zip from user

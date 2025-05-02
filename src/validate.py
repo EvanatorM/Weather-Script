@@ -1,4 +1,5 @@
 import re
+import json
 
 def validateZip(zip):
     # Check regex
@@ -15,3 +16,22 @@ def validateAddress(data):
         return False
 
     return True
+
+def validateLatLong(lat, long):
+    try:
+        float(lat)
+        float(long)
+    except:
+        print("Invalid location")
+        return False
+
+def validateWeather(data):
+    try:
+        data = json.loads(data)
+        if (len(data["timelines"]["daily"]) < 3):
+            return False
+        
+        return True
+    except:
+        print("Invalid weather response")
+        return False
