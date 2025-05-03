@@ -8,14 +8,18 @@ import src.validate as validate
 GOOGLE_MAPS_ENDPOINT = "https://maps.googleapis.com"
 TOMORROW_ENDPOINT = "https://api.tomorrow.io"
 
-def getZipFromUser():
+def get_zip_from_user():
     zip = input("Enter zipcode: ")
-    while (not validate.validateZip(zip)):
+    while (not validate.validate_zip(zip)):
         zip = input("Enter zipcode: ")
 
     return zip
 
-def getLocation(zip):
+def get_location(zip):
+    # Validate zip
+    if (not validate.validate_zip(zip)):
+        return None, None
+
     # Get lat and long from zip
     res = requests.get(f"{GOOGLE_MAPS_ENDPOINT}/maps/api/geocode/json?address={zip}&key={config.GEOCODE_API_KEY}")
 
@@ -26,7 +30,7 @@ def getLocation(zip):
     # Validate address
     try:
         data = json.loads(res.content)
-        if (not validate.validateAddress(data)):
+        if (not validate.validate_address(data)):
             print("Failed to get location from zipcode")
             return None, None
         
@@ -36,7 +40,7 @@ def getLocation(zip):
         long = data["results"][0]["geometry"]["location"]["lng"]
 
         # Validate lat and long
-        if (not validate.validateLatLong(lat, long)):
+        if (not validate.validate_lat_long(lat, long)):
             print("Failed to get location from zipcode")
             return None, None
     except:
@@ -49,7 +53,7 @@ def getLocation(zip):
     location = f"{lat},{long}"
     return location, city
 
-def getWeather(location):
+def get_weather(location):
     # Get weather info
     res = requests.get(f"{TOMORROW_ENDPOINT}/v4/weather/forecast?location={location}&apikey={config.TOMORROW_API_KEY}&units=imperial")
 
@@ -57,13 +61,13 @@ def getWeather(location):
         print("Failed to get weather from zipcode")
         return None
     
-    if (not validate.validateWeather(res.content)):
+    if (not validate.validate_weather(res.content)):
         print("Failed to get weather from zipcode")
         return None
     
     return res.content
 
-def printDay(day):
+def print_day(day):
     try:
         date_string = day["time"].split('T')[0].split('-')
         date = datetime.datetime(int(date_string[0]), int(date_string[1]), int(date_string[2]))
@@ -80,14 +84,14 @@ def printDay(day):
     except:
         print("Failed to print weather")
 
-def printWeather(data, city):
+def print_weather(data, city):
     try:
         data = json.loads(data)
         daily = data["timelines"]["daily"]
         print(f"---------- Forecast for {city}: ----------")
-        printDay(daily[0])
-        printDay(daily[1])
-        printDay(daily[2])
+        print_day(daily[0])
+        print_day(daily[1])
+        print_day(daily[2])
     except:
         print("Invalid weather response")
 
@@ -95,15 +99,15 @@ def main():
     # Get zip from user
     data = None
     while (data == None):
-        zip = getZipFromUser()
+        zip = get_zip_from_user()
 
-        location, city = getLocation(zip)
+        location, city = get_location(zip)
         if (location == None):
             continue
 
-        data = getWeather(location)
+        data = get_weather(location)
     
-    printWeather(data, city)
+    print_weather(data, city)
 
 
 if __name__ == "__main__":
