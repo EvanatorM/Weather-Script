@@ -33,12 +33,19 @@ Python was used for this project with the following dependencies:
 - requests 2.32.3
 - urllib3 2.3.0
 
+I used the requests package to make the API requests. The rest of the dependencies are needed by the requests package.
+
 ## APIs Used
 I used the following APIs in this project:
 - Google Geocode - This API gives location data. I use it here to get the latitude and longitude of the given zip code. It is also used to verify that the zip code exists.
 - Tomorrow.io - This API takes lat and long values and returns a weather forecast.
 
+## Static Code Test
+I used Bearer to perform a static code test. It ran 175 checks on 579 files and found no failures and 2 external services.
+
 ## Threat Modeling
 ### Threats mitigated
 
+
 ### Threats not handled
+Tampering (integrity): The program logs the user's input to a file. The user can input unexpected characters that can corrupt the log files or make them large enough to fill up the disk space.
