@@ -4,6 +4,7 @@ import datetime
 import calendar
 import src.config as config
 import src.validate as validate
+import src.logs as logs
 
 GOOGLE_MAPS_ENDPOINT = "https://maps.googleapis.com"
 TOMORROW_ENDPOINT = "https://api.tomorrow.io"
@@ -25,6 +26,7 @@ def get_location(zip):
 
     if (res.status_code != 200):
         print("Failed to get location from zipcode")
+        logs.log(f"Failed to get location from zipcode: {zip}")
         return None, None
 
     # Validate address
@@ -32,6 +34,7 @@ def get_location(zip):
         data = json.loads(res.content)
         if (not validate.validate_address(data)):
             print("Failed to get location from zipcode")
+            logs.log(f"Location returned from Geocode is invalid for zip: {zip}")
             return None, None
         
         # Check if components are there
@@ -42,12 +45,14 @@ def get_location(zip):
         # Validate lat and long
         if (not validate.validate_lat_long(lat, long)):
             print("Failed to get location from zipcode")
+            logs.log(f"Failed to validate lat and log for zip: {zip}")
             return None, None
     except:
         # If this errors out, it means the response is invalid
         # I didn't put this in validate.py since it does both validation and getting
         # the variables at the same time.
         print("Failed to get location from zipcode")
+        logs.log(f"Location returned from Geocode is invalid for zip: {zip}")
         return None, None
 
     location = f"{lat},{long}"
@@ -59,10 +64,12 @@ def get_weather(location):
 
     if (res.status_code != 200):
         print("Failed to get weather from zipcode")
+        logs.log(f"Failed to get weather from Tomorrow.io for location: {location}")
         return None
     
     if (not validate.validate_weather(res.content)):
         print("Failed to get weather from zipcode")
+        logs.log(f"Failed to validate response from Tomorrow.io for location: {location}")
         return None
     
     return res.content
@@ -83,6 +90,7 @@ def print_day(day):
         print("")
     except:
         print("Failed to print weather")
+        logs.log(f"Failed to print weather")
 
 def print_weather(data, city):
     try:
@@ -92,8 +100,11 @@ def print_weather(data, city):
         print_day(daily[0])
         print_day(daily[1])
         print_day(daily[2])
+        
+        logs.log(f"Successfully printed weather for city {city}")
     except:
         print("Invalid weather response")
+        logs.log(f"Invalid weather response from city: {city}")
 
 def main():
     # Get zip from user
