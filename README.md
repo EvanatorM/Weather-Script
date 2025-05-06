@@ -45,7 +45,9 @@ I used Bearer to perform a static code test. It ran 175 checks on 579 files and 
 
 ## Threat Modeling
 ### Threats mitigated
+Spoofing (authenticity): All keys are ignored by .gitignore, so nobody can use other peoples' keys.
 
+Elevation of privilege (authorization): Because keys are not included, nobody can access information if they are not authorized to do so (they would only be authorized if they created their own accounts).
 
 ### Threats not handled
 Tampering (integrity): The program logs the user's input to a file. The user can input unexpected characters that can corrupt the log files or make them large enough to fill up the disk space.
